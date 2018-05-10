@@ -105,13 +105,17 @@ class LSTM_angel(torch.nn.Module) :
         self.lstm1 = nn.LSTM(embedding_dim, hidden_dim//2 if bidirectional else hidden_dim, batch_first=True, bidirectional=bidirectional)
         self.lstm2 = nn.LSTM(embedding_dim, hidden_dim//2 if bidirectional else hidden_dim, batch_first=True, bidirectional=bidirectional)
         self.linear1 = nn.Linear(2, 200)
-#         self.dropout1 = nn.Dropout(p=0.1)
-#         self.linear2 = nn.Linear(200, 200)
-#         self.dropout2 = nn.Dropout(p=0.1)
-#         self.linear3 = nn.Linear(200, 200)
-#         self.dropout3 = nn.Dropout(p=0.1)
-#         self.linear4 = nn.Linear(200, 200)
-#         self.dropout4 = nn.Dropout(p=0.1)
+        self.dropout1 = nn.Dropout(p=0.1)
+        # self.batchnorm1 = nn.BatchNorm1d(200)
+        self.linear2 = nn.Linear(200, 200)
+        self.dropout2 = nn.Dropout(p=0.1)
+        # self.batchnorm2 = nn.BatchNorm1d(200)
+        self.linear3 = nn.Linear(200, 200)
+        self.dropout3 = nn.Dropout(p=0.1)
+        # self.batchnorm3 = nn.BatchNorm1d(200)
+        self.linear4 = nn.Linear(200, 200)
+        self.dropout4 = nn.Dropout(p=0.1)
+        # self.batchnorm4 = nn.BatchNorm1d(200)
         self.linear5 = nn.Linear(200, 2)
         
     def forward(self, text1, text2, hidden_init=None) :
@@ -124,10 +128,32 @@ class LSTM_angel(torch.nn.Module) :
         # feature_vec = torch.cat((text1_seq_embedding,text2_seq_embedding), dim=1)
         feature_vec = torch.cat((dot_value,dist_value), dim=1)
 #         print(feature_vec.size())
-        merged = self.linear1(feature_vec)
-        merged = F.relu(merged)
-        merged = self.linear5(merged)
-        return F.log_softmax(merged, dim=1)
+
+
+        linearout_1 = self.linear1(feature_vec)
+        linearout_1 = F.relu(linearout_1)
+        linearout_1 = self.dropout1(linearout_1)
+        # linearout_1 = self.batchnorm1(linearout_1)
+
+        linearout_2 = self.linear2(linearout_1)
+        linearout_2 = F.relu(linearout_2)
+        linearout_2 = self.dropout2(linearout_2)
+        # linearout_2 = self.batchnorm2(linearout_2)
+
+        linearout_3 = self.linear3(linearout_2)
+        linearout_3 = F.relu(linearout_3)
+        linearout_3 = self.dropout3(linearout_3)
+        # linearout_3 = self.batchnorm3(linearout_3)
+
+        linearout_4 = self.linear4(linearout_3)
+        linearout_4 = F.relu(linearout_4)
+        linearout_4 = self.dropout4(linearout_4)
+        # linearout_4 = self.batchnorm4(linearout_4)
+
+
+        linearout_5 = self.linear5(linearout_4)
+
+        return F.log_softmax(linearout_5, dim=1)
     
     def lstm_embedding(self, lstm, word_embedding ,hidden_init):
         lstm_out,(lstm_h, lstm_c) = lstm(word_embedding, None)
