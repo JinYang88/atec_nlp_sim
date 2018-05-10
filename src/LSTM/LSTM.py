@@ -104,7 +104,7 @@ class LSTM_angel(torch.nn.Module) :
         
         self.lstm1 = nn.LSTM(embedding_dim, hidden_dim//2 if bidirectional else hidden_dim, batch_first=True, bidirectional=bidirectional)
         self.lstm2 = nn.LSTM(embedding_dim, hidden_dim//2 if bidirectional else hidden_dim, batch_first=True, bidirectional=bidirectional)
-        self.linear1 = nn.Linear(2 * hidden_dim, 200)
+        self.linear1 = nn.Linear(2, 200)
 #         self.dropout1 = nn.Dropout(p=0.1)
 #         self.linear2 = nn.Linear(200, 200)
 #         self.dropout2 = nn.Dropout(p=0.1)
@@ -118,12 +118,11 @@ class LSTM_angel(torch.nn.Module) :
         text1_word_embedding = self.word_embedding(text1)
         text2_word_embedding = self.word_embedding(text2)
         text1_seq_embedding = self.lstm_embedding(self.lstm1, text1_word_embedding, hidden_init)
-        text2_seq_embedding = self.lstm_embedding(self.lstm1, text2_word_embedding, hidden_init)
-#         dot_value = torch.bmm(text1_seq_embedding.view(text1.size()[0], 1, self.hidden_dim), text2_seq_embedding.view(text1.size()[0], self.hidden_dim, 1))
-#         dot_value = dot_value.view(text1.size()[0], 1)
-#         dist_value = self.dist(text1_seq_embedding, text2_seq_embedding).view(text1.size()[0], 1)
-        feature_vec = torch.cat((text1_seq_embedding,text2_seq_embedding), dim=1)
-#         feature_vec = torch.cat((dot_value,dist_value), dim=1)
+        text2_seq_embedding = self.lstm_embedding(self.lstm2, text2_word_embedding, hidden_init)
+        dot_value = torch.bmm(text1_seq_embedding.view(text1.size()[0], 1, self.hidden_dim), text2_seq_embedding.view(text1.size()[0], self.hidden_dim, 1)).view(text1.size()[0], 1)
+        dist_value = self.dist(text1_seq_embedding, text2_seq_embedding).view(text1.size()[0], 1)
+        # feature_vec = torch.cat((text1_seq_embedding,text2_seq_embedding), dim=1)
+        feature_vec = torch.cat((dot_value,dist_value), dim=1)
 #         print(feature_vec.size())
         merged = self.linear1(feature_vec)
         merged = F.relu(merged)
@@ -137,13 +136,6 @@ class LSTM_angel(torch.nn.Module) :
         else:
             seq_embedding = lstm_h.squeeze(0)
         return seq_embedding
-
-    def init_hidden(self, batch_size, device) :
-        layer_num = 2 if self.bidirectional else 1
-        if device == -1:
-            return (Variable(torch.randn(layer_num, batch_size, self.hidden_dim//layer_num)),Variable(torch.randn(layer_num, batch_size, self.hidden_dim//layer_num)))  
-        else:
-            return (Variable(torch.randn(layer_num, batch_size, self.hidden_dim//layer_num).cuda()),Variable(torch.randn(layer_num, batch_size, self.hidden_dim//layer_num).cuda()))  
 
 
 print('Initialing model..')
@@ -183,7 +175,7 @@ if not test_mode:
             batch_count += 1
             if batch_count % print_every == 0:
                 print("Evaluating....")
-                loss, (acc, Precision, Recall, F1) = predict_on(MODEL, train_dl, loss_func, device)
+                loss, (acc, Precision, Recall, F1) = predict_on(MODEL, valid_dl, loss_func, device)
                 batch_end = time.time()
                 if F1 > max_metric:
                     best_state = MODEL.state_dict()
