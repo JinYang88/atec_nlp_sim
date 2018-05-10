@@ -45,7 +45,7 @@ def load_glove_as_dict(filepath):
             line = line.split()
             word = line[0]
             vec = line[1:]
-            word_vec[word] = vec
+            word_vec[word] = np.array(vec, dtype=float)
     return word_vec
 
 
