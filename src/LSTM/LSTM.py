@@ -24,12 +24,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 batch_size = 16
 embedding_dim = 300
-hidden_dim = 300
+hidden_dim = 400
 out_dim = 1
 
-epochs = 20
+epochs = 30
 print_every = 500
-bidirectional = False
+bidirectional = True
 
 
 print('Reading data..')
@@ -89,6 +89,14 @@ def predict_on(model, data_dl, loss_func, device ,model_state_path=None):
     
     return loss, (acc, Precision, Recall, F1)
 
+def jaccard(list1, list2):
+    set1 = set(list1)
+    set2 = set(list2)
+    avg_len = (len(set1) + len(set2)) / 2
+    min_len = min(len(set1),len(set2))
+    return len(set1 & set2) * 1.0 / (len(set1) + len(set2) - len(set1 & set2))
+    # return len(set1 & set2) * 1.0 / min_len
+
 
 class LSTM_angel(torch.nn.Module) :
     def __init__(self, vocab_size, embedding_dim, hidden_dim, batch_size,wordvec_matrix, bidirectional):
@@ -104,7 +112,7 @@ class LSTM_angel(torch.nn.Module) :
         
         self.lstm1 = nn.LSTM(embedding_dim, hidden_dim//2 if bidirectional else hidden_dim, batch_first=True, bidirectional=bidirectional)
         self.lstm2 = nn.LSTM(embedding_dim, hidden_dim//2 if bidirectional else hidden_dim, batch_first=True, bidirectional=bidirectional)
-        self.linear1 = nn.Linear(2, 200)
+        self.linear1 = nn.Linear(3, 200)
         self.dropout1 = nn.Dropout(p=0.1)
         # self.batchnorm1 = nn.BatchNorm1d(200)
         self.linear2 = nn.Linear(200, 200)
@@ -125,10 +133,10 @@ class LSTM_angel(torch.nn.Module) :
         text2_seq_embedding = self.lstm_embedding(self.lstm2, text2_word_embedding, hidden_init)
         dot_value = torch.bmm(text1_seq_embedding.view(text1.size()[0], 1, self.hidden_dim), text2_seq_embedding.view(text1.size()[0], self.hidden_dim, 1)).view(text1.size()[0], 1)
         dist_value = self.dist(text1_seq_embedding, text2_seq_embedding).view(text1.size()[0], 1)
-        # feature_vec = torch.cat((text1_seq_embedding,text2_seq_embedding), dim=1)
-        feature_vec = torch.cat((dot_value,dist_value), dim=1)
-#         print(feature_vec.size())
+        jaccard_value = self.jaccard(text1, text2)
+        feature_vec = torch.cat((dot_value, dist_value, jaccard_value), dim=1)
 
+#         feature_vec = torch.cat((text1_seq_embedding,text2_seq_embedding), dim=1)
 
         linearout_1 = self.linear1(feature_vec)
         linearout_1 = F.relu(linearout_1)
@@ -154,7 +162,18 @@ class LSTM_angel(torch.nn.Module) :
         linearout_5 = self.linear5(linearout_4)
 
         return F.log_softmax(linearout_5, dim=1)
-    
+
+
+    def jaccard(self, list1, list2):
+        reslist = []
+        for idx in range(list1.size()[0]):
+            set1 = set(list1[idx].data.numpy())
+            set2 = set(list2[idx].data.numpy())
+            jaccard = len(set1 & set2) * 1.0 / (len(set1) + len(set2) - len(set1 & set2))
+            reslist.append(jaccard)
+        return torch.FloatTensor(reslist).view(-1, 1)
+
+
     def lstm_embedding(self, lstm, word_embedding ,hidden_init):
         lstm_out,(lstm_h, lstm_c) = lstm(word_embedding, None)
         if self.bidirectional:

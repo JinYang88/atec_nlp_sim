@@ -1,4 +1,4 @@
-SUBMIT = True
+SUBMIT = False
 
 import io
 import sys
@@ -27,12 +27,12 @@ def wordcut(line):
     return [i for i in line]
 
 def preprocess(line, stopwords, simiwords):
-    for word, subword in simiwords.iteritems():
-        if word in line:
-            line = re.sub(word, subword, line)
+    # for word, subword in simiwords.iteritems():
+    #     if word in line:
+    #         line = re.sub(word, subword, line)
 
-    # wordlist = [word for word in wordcut(line.strip()) if word not in stopwords]
-    wordlist = [word for word in jieba.lcut(line.strip()) if word not in stopwords]
+    wordlist = [word for word in wordcut(line.strip()) if word not in stopwords]
+    # wordlist = [word for word in jieba.lcut(line.strip()) if word not in stopwords]
     
     return wordlist
 
@@ -41,23 +41,23 @@ if __name__ == '__main__':
         infile = sys.argv[1]
         outfile = sys.argv[2]
     else:
-        infile = "../data/train.tsv"
-        outfile = "../data/predict.tsv"
+        infile = "../../data/train.tsv"
+        outfile = "../../data/predict.tsv"
 
     train_list = []
     stopwords = set([])
     simiwords = {}
-    jieba.load_userdict("dict.txt")
+    jieba.load_userdict("../txt/dict.txt")
 
 
-    with io.open("stopwords.txt", encoding='utf-8') as fr:
+    with io.open("../txt/stopwords.txt", encoding='utf-8') as fr:
         for line in fr:
             stopwords.add(line.strip())
 
-    with io.open("simiwords.txt", encoding='utf-8') as fr:
-        for line in fr:
-            words = re.split(",", line.strip())
-            simiwords[words[0]] = words[1]
+    # with io.open("simiwords.txt", encoding='utf-8') as fr:
+    #     for line in fr:
+    #         words = re.split(",", line.strip())
+    #         simiwords[words[0]] = words[1]
 
 
     ground_truth = []
