@@ -134,6 +134,8 @@ class LSTM_angel(torch.nn.Module) :
         dot_value = torch.bmm(text1_seq_embedding.view(text1.size()[0], 1, self.hidden_dim), text2_seq_embedding.view(text1.size()[0], self.hidden_dim, 1)).view(text1.size()[0], 1)
         dist_value = self.dist(text1_seq_embedding, text2_seq_embedding).view(text1.size()[0], 1)
         jaccard_value = self.jaccard(text1, text2)
+        jaccard_value = jaccard_value.to(device)
+
         feature_vec = torch.cat((dot_value, dist_value, jaccard_value), dim=1)
 
 #         feature_vec = torch.cat((text1_seq_embedding,text2_seq_embedding), dim=1)
@@ -167,8 +169,8 @@ class LSTM_angel(torch.nn.Module) :
     def jaccard(self, list1, list2):
         reslist = []
         for idx in range(list1.size()[0]):
-            set1 = set(list1[idx].data.numpy())
-            set2 = set(list2[idx].data.numpy())
+            set1 = set(list1[idx].data.cpu().numpy())
+            set2 = set(list2[idx].data.cpu().numpy())
             jaccard = len(set1 & set2) * 1.0 / (len(set1) + len(set2) - len(set1 & set2))
             reslist.append(jaccard)
         return torch.FloatTensor(reslist).view(-1, 1)
