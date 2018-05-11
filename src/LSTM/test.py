@@ -127,7 +127,6 @@ class LSTM_angel(torch.nn.Module) :
 
 SUBMIT = True
 
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 batch_size = 16
 embedding_dim = 300
@@ -162,7 +161,7 @@ test = data.TabularDataset(
 
 TEXT.build_vocab(train, min_freq=3)
 print('Building vocabulary Finished.')
-word_matrix = datahelper.wordlist_to_matrix("../txt/embedding_300d.txt", TEXT.vocab.itos, device, embedding_dim)
+word_matrix = datahelper.wordlist_to_matrix("../txt/embedding_300d.bin", TEXT.vocab.itos, device, embedding_dim)
 
 test_iter = data.Iterator(dataset=test, batch_size=batch_size, device=device, shuffle=False, repeat=False)
 test_dl = datahelper.BatchWrapper(test_iter, ["Id", "Text1", "Text2"])

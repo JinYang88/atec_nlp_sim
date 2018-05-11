@@ -57,10 +57,7 @@ def wordlist_to_matrix(pretrain_path, wordlist, device, dim=200):
     oov_words = []
     for idx, word in enumerate(wordlist):
         try:
-            if sys.version_info < (3, 4):
-                vector = np.array(word_vec[word.encode('utf-8')], dtype=float).reshape(1,dim)
-            else:
-                vector = np.array(word_vec[word], dtype=float).reshape(1,dim)
+            vector = np.array(word_vec[word], dtype=float).reshape(1,dim)
         except:
             oov += 1
             oov_words.append(word)

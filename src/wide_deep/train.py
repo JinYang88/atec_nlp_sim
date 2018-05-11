@@ -19,16 +19,14 @@ from sklearn.metrics import accuracy_score, recall_score, precision_score, f1_sc
 
 torch.manual_seed(42)
 
-test_mode = 0  # 0 for train+test 1 for test
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 batch_size = 32
 embedding_dim = 300
 hidden_dim = 400
-out_dim = 1
 
 epochs = 30
-print_every = 500
+print_every = 300
 bidirectional = True
 
 print('Reading data..')
@@ -104,18 +102,18 @@ class wide_deep(torch.nn.Module) :
         
         self.mp = nn.MaxPool1d(hidden_dim, stride=1)
         
-        self.deep1 = nn.Linear(2 * hidden_dim, 300)
+        self.deep1 = nn.Linear(2 * hidden_dim, 200)
         self.dropout1 = nn.Dropout(p=0.1)
-        self.deep2 = nn.Linear(300, 300)
+        self.deep2 = nn.Linear(200, 200)
         self.dropout2 = nn.Dropout(p=0.1)
-        self.deep3 = nn.Linear(300, 200)
+        self.deep3 = nn.Linear(200, 200)
         self.dropout3 = nn.Dropout(p=0.1)
-        self.deep4 = nn.Linear(200, 100)
+        self.deep4 = nn.Linear(200, 200)
         self.dropout4 = nn.Dropout(p=0.1)
-        self.deep5 = nn.Linear(100, 16)
+        self.deep5 = nn.Linear(200, 200)
         self.dropout5 = nn.Dropout(p=0.1)
         
-        self.merge_layer = nn.Linear(16+5, 2)
+        self.merge_layer = nn.Linear(200 + 5, 2)
         
     def forward(self, text1, text2, hidden_init=None) :
         text1_word_embedding = self.word_embedding(text1)
@@ -212,38 +210,35 @@ best_state = None
 max_metric = 0
 
 # Train
-if not test_mode:
-    loss_func = nn.NLLLoss()
-    parameters = list(filter(lambda p: p.requires_grad, MODEL.parameters()))
-    optimizer = optim.Adam(parameters, lr=1e-4)
-    print('Start training..')
+loss_func = nn.NLLLoss()
+parameters = list(filter(lambda p: p.requires_grad, MODEL.parameters()))
+optimizer = optim.Adam(parameters, lr=1e-4)
+print('Start training..')
 
-    train_iter.create_batches()
-    batch_num = len(list(train_iter.batches))
+train_iter.create_batches()
+batch_num = len(list(train_iter.batches))
 
-    batch_start = time.time()
-    for i in range(epochs) :
-        train_iter.init_epoch()
-        batch_count = 0
-        for text1, text2, label in train_dl:
-            MODEL.train()
-            y_pred = MODEL(text1, text2)
-            loss = loss_func(y_pred, label)
-#             print(y_pred[0:3], label[0:3])
-            MODEL.zero_grad()
-            loss.backward()
-            optimizer.step()
-            batch_count += 1
-#             sys.exit()
-            if batch_count % print_every == 0:
-                print("Evaluating....")
-                loss, (acc, Precision, Recall, F1) = predict_on(MODEL, valid_dl, loss_func, device)
-                batch_end = time.time()
-                if F1 > max_metric:
-                    best_state = MODEL.state_dict()
-                    max_metric = F1
-                    print("Saving model..")
-                    torch.save(best_state, '../model_save/wide_deep.pth')           
-                print('{}/{} batch, {}/{} epoch. Time: {}s. F1: {}, precision: {}, recall: {}, Loss is {}'.format(batch_count, batch_num, i+1, epochs, round(batch_end - batch_start, 2), F1, Precision, Recall, float(loss)))
+batch_start = time.time()
+for i in range(epochs) :
+    train_iter.init_epoch()
+    batch_count = 0
+    for text1, text2, label in train_dl:
+        MODEL.train()
+        y_pred = MODEL(text1, text2)
+        loss = loss_func(y_pred, label)
+        MODEL.zero_grad()
+        loss.backward()
+        optimizer.step()
+        batch_count += 1
+        if batch_count % print_every == 0:
+            print("Evaluating....")
+            loss, (acc, Precision, Recall, F1) = predict_on(MODEL, valid_dl, loss_func, device)
+            batch_end = time.time()
+            if F1 > max_metric:
+                best_state = MODEL.state_dict()
+                max_metric = F1
+                print("Saving model..")
+                torch.save(best_state, '../model_save/wide_deep.pth')           
+            print('{}/{} batch, {}/{} epoch. Time: {}s. F1: {}, precision: {}, recall: {}, Loss is {}'.format(batch_count, batch_num, i+1, epochs, round(batch_end - batch_start, 2), F1, Precision, Recall, float(loss)))
 
 
