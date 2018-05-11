@@ -89,14 +89,6 @@ def predict_on(model, data_dl, loss_func, device ,model_state_path=None):
     
     return loss, (acc, Precision, Recall, F1)
 
-def jaccard(list1, list2):
-    set1 = set(list1)
-    set2 = set(list2)
-    avg_len = (len(set1) + len(set2)) / 2
-    min_len = min(len(set1),len(set2))
-    return len(set1 & set2) * 1.0 / (len(set1) + len(set2) - len(set1 & set2))
-    # return len(set1 & set2) * 1.0 / min_len
-
 
 class LSTM_angel(torch.nn.Module) :
     def __init__(self, vocab_size, embedding_dim, hidden_dim, batch_size,wordvec_matrix, bidirectional):

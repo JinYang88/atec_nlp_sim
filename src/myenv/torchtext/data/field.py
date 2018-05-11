@@ -3,7 +3,7 @@ from collections import Counter, OrderedDict
 from itertools import chain
 import six
 import torch
-from tqdm import tqdm
+# from tqdm import tqdm
 
 from .dataset import Dataset
 from .pipeline import Pipeline

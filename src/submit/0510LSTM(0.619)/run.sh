@@ -1,0 +1,1 @@
+python LSTM/test.py $1 $2

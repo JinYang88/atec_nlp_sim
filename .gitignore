@@ -2,3 +2,5 @@
 *.tsv
 *.ipynb
 *.zip
+*.pth
+*.txt

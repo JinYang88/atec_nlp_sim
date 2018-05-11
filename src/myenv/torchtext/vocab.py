@@ -10,7 +10,7 @@ import zipfile
 import six
 from six.moves.urllib.request import urlretrieve
 import torch
-from tqdm import tqdm
+# from tqdm import tqdm
 import tarfile
 
 from .utils import reporthook

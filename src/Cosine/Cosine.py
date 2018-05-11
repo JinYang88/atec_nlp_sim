@@ -32,6 +32,14 @@ def cosine_simi(vec1, vec2):
 def o_dis(vec1, vec2):
     return np.linalg.norm(vec1 - vec2) 
 
+def cal_j(list1, list2):
+    set1 = set(list1)
+    set2 = set(list2)
+    avg_len = (len(set1) + len(set2)) / 2
+    min_len = min(len(set1),len(set2))
+    return len(set1 & set2) * 1.0 / (len(set1) + len(set2) - len(set1 & set2))
+    # ret
+
 if __name__ == '__main__':
     if SUBMIT:
         infile = sys.argv[1]
@@ -58,6 +66,9 @@ if __name__ == '__main__':
 
     data_df["text1_cut"] = data_df['text1'].map(jieba.lcut)
     data_df["text2_cut"] = data_df['text2'].map(jieba.lcut)
+    data_df["Jaccard"] = data_df.apply(lambda x: cal_j(x['text1_cut'], x['text2_cut']), axis=1)
+    data_df.to_csv("seg_resultt.csv", index=False, encoding='GB18030')
+    sys,exit()
 
     if not SUBMIT:
         pred = []

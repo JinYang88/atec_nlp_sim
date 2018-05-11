@@ -31,8 +31,8 @@ def preprocess(line, stopwords, simiwords):
     #     if word in line:
     #         line = re.sub(word, subword, line)
 
-    wordlist = [word for word in wordcut(line.strip()) if word not in stopwords]
-    # wordlist = [word for word in jieba.lcut(line.strip()) if word not in stopwords]
+    # wordlist = [word for word in wordcut(line.strip()) if word not in stopwords]
+    wordlist = [word for word in jieba.lcut(line.strip()) if word not in stopwords]
     
     return wordlist
 
@@ -91,14 +91,15 @@ if __name__ == '__main__':
             predict = []
             jaccard_info = []
             for sample in train_list:
-                # jaccard_info.append([sample[1], sample[2], sample[3], cal_j(sample[1], sample[2])])
+                jaccard_info.append([sample[1], sample[2], sample[3], cal_j(sample[1], sample[2])])
                 if cal_j(sample[1], sample[2]) > threshold:
                     predict.append(1)
                 else:
                     predict.append(0)
-            # save_df(jaccard_info)
             acc = round(accuracy_score(predict, ground_truth), 2)
             f1 = round(f1_score(predict, ground_truth), 2)
             avg = (acc + f1) / 2  
             print("Using [{}] as threshold, acc is [{}], f1 is [{}], avg if [{}]".format(threshold, acc, f1, avg))
+
+        save_df(jaccard_info)
 
