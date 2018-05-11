@@ -162,7 +162,7 @@ test = data.TabularDataset(
 
 TEXT.build_vocab(train, min_freq=3)
 print('Building vocabulary Finished.')
-word_matrix = datahelper.wordlist_to_matrix("../../data/embedding_300d.txt", TEXT.vocab.itos, device, embedding_dim)
+word_matrix = datahelper.wordlist_to_matrix("../txt/embedding_300d.txt", TEXT.vocab.itos, device, embedding_dim)
 
 test_iter = data.Iterator(dataset=test, batch_size=batch_size, device=device, shuffle=False, repeat=False)
 test_dl = datahelper.BatchWrapper(test_iter, ["Id", "Text1", "Text2"])

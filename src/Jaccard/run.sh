@@ -1,1 +1,0 @@
-python jaccard.py $1 $2

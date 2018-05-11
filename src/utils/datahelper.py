@@ -53,6 +53,7 @@ def wordlist_to_matrix(pretrain_path, wordlist, device, dim=200):
     word_vec = load_glove_as_dict(filepath=pretrain_path)
     word_vec_list = []
     oov = 0
+    oov_words = []
     for idx, word in enumerate(wordlist):
         try:
             if sys.version_info < (3, 4):
@@ -61,10 +62,14 @@ def wordlist_to_matrix(pretrain_path, wordlist, device, dim=200):
                 vector = np.array(word_vec[word], dtype=float).reshape(1,dim)
         except:
             oov += 1
+            oov_words.append(word)
             # print(word)
             vector = np.random.rand(1, dim)
         word_vec_list.append(torch.from_numpy(vector))
     wordvec_matrix = torch.cat(word_vec_list)
+    with open("oov_words.txt", "w") as fw:
+        for word in oov_words:
+            fw.write(u"{}\n".format(word))
     print("Load embedding finished.")
     print("Total words count: {}, oov count: {}.".format(wordvec_matrix.size()[0], oov))
     return wordvec_matrix if device == -1 else wordvec_matrix.to(device)
