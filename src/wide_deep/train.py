@@ -102,18 +102,19 @@ class wide_deep(torch.nn.Module) :
         
         self.mp = nn.MaxPool1d(hidden_dim, stride=1)
         
-        self.deep1 = nn.Linear(2 * hidden_dim, 200)
-        self.dropout1 = nn.Dropout(p=0.1)
-        self.deep2 = nn.Linear(200, 200)
-        self.dropout2 = nn.Dropout(p=0.1)
-        self.deep3 = nn.Linear(200, 200)
-        self.dropout3 = nn.Dropout(p=0.1)
-        self.deep4 = nn.Linear(200, 200)
+        self.deep1 = nn.Linear(2 * hidden_dim, 300)
+        self.dropout1 = nn.Dropout(p=0.5)
+        self.deep2 = nn.Linear(300, 200)
+        self.dropout2 = nn.Dropout(p=0.5)
+        self.deep3 = nn.Linear(200, 100)
+        self.dropout3 = nn.Dropout(p=0.5)
+
+        self.deep4 = nn.Linear(300, 300)
         self.dropout4 = nn.Dropout(p=0.1)
-        self.deep5 = nn.Linear(200, 200)
+        self.deep5 = nn.Linear(300, 300)
         self.dropout5 = nn.Dropout(p=0.1)
         
-        self.merge_layer = nn.Linear(200 + 5, 2)
+        self.merge_layer = nn.Linear(100 + 5, 2)
         
     def forward(self, text1, text2, hidden_init=None) :
         text1_word_embedding = self.word_embedding(text1)
@@ -156,9 +157,9 @@ class wide_deep(torch.nn.Module) :
         merged = self.dropout3(merged)
         # merge = self.batchnorm3(merge)
 
-        merged = self.deep4(merged)
-        merged = F.relu(merged)
-        merged = self.dropout4(merged)
+        # merged = self.deep4(merged)
+        # merged = F.relu(merged)
+        # merged = self.dropout4(merged)
         # merge = self.batchnorm4(merge)
         merged_deep = self.deep5(merged)
 
@@ -212,7 +213,7 @@ max_metric = 0
 # Train
 loss_func = nn.NLLLoss()
 parameters = list(filter(lambda p: p.requires_grad, MODEL.parameters()))
-optimizer = optim.Adam(parameters, lr=1e-4)
+optimizer = optim.Adam(parameters, lr=1e-3)
 print('Start training..')
 
 train_iter.create_batches()
