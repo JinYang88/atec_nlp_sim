@@ -147,14 +147,14 @@ class wide_deep(torch.nn.Module) :
         hand_merged = self.linear(wide_feature)
         hand_merged = F.relu(hand_merged)
 
-        deep_feature = torch.cat((deep_feature, hand_merged), dim=1)
+        # deep_feature = torch.cat((deep_feature, hand_merged), dim=1)
 
-        merged = self.deep1(deep_feature)
-        merged = F.relu(merged)
-        merged = self.dropout1(merged)
+        # merged = self.deep1(deep_feature)
+        # merged = F.relu(merged)
+        # merged = self.dropout1(merged)
         # merged = self.batchnorm1(merged)
 
-        merged = self.deep2(merged)
+        merged = self.deep2(hand_merged)
         merged = F.relu(merged)
         merged = self.dropout2(merged)
         # merged = self.batchnorm2(merged)
