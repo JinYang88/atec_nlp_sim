@@ -53,7 +53,7 @@ if __name__ == '__main__':
     simiwords = {}
     jieba.load_userdict("../txt/dict.txt")
 
-    word_vec = datahelper.load_glove_as_dict("../../data/embedding_300d.txt")
+    word_vec = datahelper.load_glove_as_dict("../txt/embedding_300d.txt")
 
     # print(word_vec.keys())
     with io.open("../txt/stopwords.txt", encoding='utf-8') as fr:
@@ -64,8 +64,11 @@ if __name__ == '__main__':
     data_df = pd.read_csv(infile, sep="\t", names=["id", "text1", "text2", "label"])
 
 
-    data_df["text1_cut"] = data_df['text1'].map(jieba.lcut)
-    data_df["text2_cut"] = data_df['text2'].map(jieba.lcut)
+    data_df["text1_cut"] = data_df['text1'].map(lambda x: len(jieba.lcut(x)))
+    data_df["text2_cut"] = data_df['text2'].map(lambda x: len(jieba.lcut(x)))
+    print(data_df["text1_cut"].describe())
+    print(data_df["text2_cut"].describe())
+    sys.exit()
     data_df["Jaccard"] = data_df.apply(lambda x: cal_j(x['text1_cut'], x['text2_cut']), axis=1)
     data_df.to_csv("seg_resultt.csv", index=False, encoding='GB18030')
     sys,exit()

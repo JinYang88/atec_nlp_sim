@@ -12,6 +12,7 @@ import string
 import json
 import io
 import jieba
+from gensim.models import Word2Vec
 
 jieba.load_userdict("../txt/dict.txt")
 
@@ -50,7 +51,7 @@ def load_glove_as_dict(filepath):
 
 
 def wordlist_to_matrix(pretrain_path, wordlist, device, dim=200):
-    word_vec = load_glove_as_dict(filepath=pretrain_path)
+    word_vec = Word2Vec.load(pretrain_path).wv
     word_vec_list = []
     oov = 0
     oov_words = []

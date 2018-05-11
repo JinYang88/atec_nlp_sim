@@ -48,7 +48,7 @@ valid = data.TabularDataset(
 
 TEXT.build_vocab(train, min_freq=3)
 print('Building vocabulary Finished.')
-word_matrix = datahelper.wordlist_to_matrix("../txt/embedding_300d.txt", TEXT.vocab.itos, device, embedding_dim)
+word_matrix = datahelper.wordlist_to_matrix("../txt/embedding_300d.bin", TEXT.vocab.itos, device, embedding_dim)
 
 
 

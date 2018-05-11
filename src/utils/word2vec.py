@@ -42,9 +42,11 @@ for idx, line in train_df.iterrows():
 model = gensim.models.Word2Vec(sentences, min_count=3, size=300,
 window=3, iter=100, sg=0)
 
-with open("../txt/embedding_300d.txt", 'w') as fw:
-    for k in model.wv.vocab:
-        fw.write("{} {}\n".format(k, ' '.join(model[k].astype(str))))
+
+model.save("../txt/embedding_300d.bin")
+# with open("../txt/embedding_300d.txt", 'w') as fw:
+#     for k in model.wv.vocab:
+#         fw.write("{} {}\n".format(k, ' '.join(model[k].astype(str))))
 
 simi_df = pd.DataFrame()
 simiwords = []
