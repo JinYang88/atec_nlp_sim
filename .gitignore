@@ -4,4 +4,5 @@
 *.zip
 *.pth
 *.txt
+*.bin
 history/
